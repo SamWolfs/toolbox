@@ -1,0 +1,16 @@
+#!/bin/bash
+
+declare -a dependencies=("az" "fzf" "xclip")
+
+for dependency in "${dependencies[@]}"; do
+    if ! command -v "$dependency" &> /dev/null
+    then
+        >&2 echo "Please install $dependency before running the command."
+        exit
+    fi
+done
+
+REGISTRY="$1"
+IMAGE=$( if [ -n "$2" ] ;then echo "$2" ;else az acr repository list --name "$REGISTRY" -o tsv | fzf ;fi)
+TAG=$(az acr repository show-tags --name "$REGISTRY" --repository "$IMAGE" -o tsv | fzf)
+echo "$IMAGE:$TAG" | xclip -selection c

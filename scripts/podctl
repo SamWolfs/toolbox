@@ -1,0 +1,22 @@
+#!/bin/zsh
+# Run as '. podctl' to load environment variables in current shell
+
+declare -a dependencies=("awk" "fzf" "jq" "kubectl")
+
+for dependency in "${dependencies[@]}"; do
+    if ! command -v "$dependency" &> /dev/null
+    then
+        >&2 echo "Please install $dependency before running the command."
+        exit
+    fi
+done
+
+PODCTL_CONFIG=${PODCTL_CONFIG:-$HOME/.config/podctl.json}
+
+POD=$(kubectl get pods | fzf | awk '{print $1}')
+COMMAND=$(jq 'keys[]' "$PODCTL_CONFIG" | tr -d '"' | fzf)
+KUBE_COMMAND=$(jq -r --arg command "$COMMAND" '.[$command]' "$PODCTL_CONFIG")
+
+print -s "$(eval echo "$KUBE_COMMAND")"
+
+eval "$KUBE_COMMAND"

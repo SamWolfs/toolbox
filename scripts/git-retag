@@ -1,0 +1,13 @@
+#!/bin/bash
+
+TAG=$1
+
+if [ -n "$TAG" ]; then
+  git tag --delete "$TAG"
+  git push origin --delete "$TAG"
+  git tag "$TAG"
+  git push origin "$TAG"
+
+else
+  echo "Provide a tag"
+fi

@@ -1,0 +1,9 @@
+#!/bin/bash
+BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+gh workflow run deploy.yaml --ref "$BRANCH"
+
+sleep 5
+
+RUN_ID=$(gh run list --workflow deploy.yaml -L1 --json databaseId -q '.[].databaseId')
+gh run watch -i 5 "$RUN_ID"
